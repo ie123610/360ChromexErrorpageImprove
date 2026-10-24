@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html i18n-values="dir:textdirection" class="dark-mode">
+  <head>
+    <title>chrome://errorpage/?errorcode</title>
+
+    <link rel="stylesheet" href="neterror.css" />
+
+    <script src="shared/js/cr.js"></script>
+    <script src="shared/js/load_time_data.js"></script>
+    <script src="shared/js/parse_html_subset.js"></script>
+    <script src="shared/js/util.js"></script>
+    <script src="chrome://errorpage/strings.js"></script>
+  </head>
+  <body id="t" hidden>
+    <div class="main s-scroll">
+      <div class="warper">
+        <div class="error-tips">
+          <div class="error-icon"></div>
+          <h2 id="tips-title">ERROR PAGE</h2>
+          <p id="tips-type"></p>
+          <div id="suggestion"></div>
+          <div id="tips-code"></div>
+          <div class="error-btns">
+            <button id="btn-goback" class="greenbtn">back</button>
+            <button id="btn-close" class="greenbtn">close</button>
+            <a id="btn-gohome" class="bluebtn">go home</a>
+            <button id="btn-refesh" class="greenbtn">refresh</button>
+            <button id="btn-jijiuxiang" class="tarnsparentbtn">jjx</button>
+          </div>
+        </div>
+        <div class="fix_top_search">
+
+          <form
+            id="search-form"
+            action="https://www.so.com/s?ie=utf-8&src=se82_errors"
+            type="GET"
+          >
+            <input type="hidden" name="ie" value="utf-8" />
+            <input type="hidden" name="src" value="se82_errors" />
+            <div class="search-ui">
+              <div class="search">
+                <div class="ipt">
+                  <input
+                    id="search-kw"
+                    name="q"
+                    type="text"
+                    placeholder="你想找什么？"
+                    autocomplete="off"
+                  />
+                </div>
+                <div class="btn">
+                  <input value="搜一下" type="submit" />
+                </div>
+                <div class="suggest_list_wrap">
+                  <ul class="suggest_list">
+                    <!-- <li>
+                    <a href="">
+                      <span>1</span>
+                      张三李四王五
+                    </a>
+                  </li> -->
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <!-- <div class="error-search" id="error-search">
+          <span id="resStatus"></span>
+          <p id="error_search_tip">search about</p>
+          <form type="get" action="https://www.so.com/s">
+            <div class="form-box clearfix">
+              <input type="hidden" name="ie" value="utf-8" />
+              <input
+                type="hidden"
+                name="src"
+                value="360chrome_errorpage_search"
+              />
+              <div class="ipt-box fl">
+                <input
+                  id="search-q"
+                  name="q"
+                  value=""
+                  type="text"
+                  placeholder="keyword"
+                  autocomplete="off"
+                />
+              </div>
+              <input
+                class="sch-btn fl"
+                id="error_search_btn"
+                type="submit"
+                value="search"
+              />
+            </div>
+          </form>
+          <iframe scrolling="no"></iframe>
+        </div> -->
+      </div>
+      <div class="frame_wrap">
+        <iframe
+          id="errors_iframe"
+          name="error_iframe"
+          frameborder="0"
+          scrolling="no"
+        ></iframe>
+      </div>
+    </div>
+    <script
+      type="text/javascript"
+      src="http://chrome.360.cn/errorpage/error.js"
+    ></script>
+    <script src="neterror.js"></script>
+    <script src="shared/js/i18n_template2.js"></script>
+  </body>
+</html>
