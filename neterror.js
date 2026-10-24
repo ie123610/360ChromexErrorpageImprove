@@ -1,53 +1,9 @@
-var Frame = {
-  api: {
-    GetSID() {
-      if (Frame.api.sid) {
-        return Frame.api.sid;
-      }
-      try {
-        Frame.api.sid = external.GetSID(window);
-        return Frame.api.sid;
-      } catch (e) {
-        return "";
-      }
-    },
-    GetMID() {
-      if (Frame.api.mid) {
-        return Frame.api.mid;
-      }
-      Frame.api.mid = Frame.api.GetSID() && external.GetMID(Frame.api.sid);
-      return Frame.api.mid;
-    },
-  },
-  sendGif: function (filename, data) {
-    var files = [];
-    if (Object.prototype.toString.call(filename) == "[object String]") {
-      files.push(filename);
-    } else if (Object.prototype.toString.call(filename) == "[object Array]") {
-      files = filename;
-    } else {
-      return;
-    }
-    files.forEach(function (item) {
-      var params = "";
-      if (data && typeof data == "object") {
-        for (var k in data) {
-          params += k + "=" + data[k] + "&";
-        }
-      }
-      new Image().src =
-        "https://dd.browser.360.cn/static/a/" +
-        item +
-        "?" +
-        params +
-        "mid=" +
-        Frame.api.GetMID() +
-        "&" +
-        Date.now() +
-        Math.random().toString().replace("0.", "").substr(0, 10);
-    });
-  },
-};
+// \u975E 360 \u6D4F\u89C8\u5668\u539F\u751F\u73AF\u5883\uFF08\u5982\u666E\u901A\u6D4F\u89C8\u5668\u9884\u89C8\uFF09\u4E0B\u8865\u4E00\u4E2A\u7A7A\u5B9E\u73B0\uFF0C\u907F\u514D\u811A\u672C\u4E2D\u65AD\u5BFC\u81F4\u767D\u5C4F
+var nativeBridge = !!(window.chrome && typeof window.chrome.send === "function");
+if (!nativeBridge) {
+  window.chrome = window.chrome || {};
+  window.chrome.send = function () {};
+}
 
 var $ = function (selector) {
     if (selector.substr(0, 1) == "#") {
@@ -94,8 +50,6 @@ var $ = function (selector) {
       // \u8C03\u4E24\u6B21\u4F7F\u6025\u6551\u7BB1\u7A97\u53E3\u5728\u6700\u524D\u9762
       chrome.send("startnetfix");
       chrome.send("startnetfix");
-      // 点击断网急救箱
-      Frame.sendGif('1489.9179.gif')
     };
   },
   get_domain = function (str) {
@@ -117,109 +71,6 @@ var $ = function (selector) {
         return true;
     }
     return false;
-  },
-  get_query_param = function (name) {
-    var match = new RegExp("[?&]" + name + "=([^&]*)").exec(
-      window.location.search
-    );
-    if (!match) {
-      return "";
-    }
-    try {
-      return decodeURIComponent(match[1].replace(/\+/g, " "));
-    } catch (e) {
-      return match[1];
-    }
-  },
-  HTTP_STATUS_TEXT = {
-    400: "Bad Request",
-    401: "Unauthorized",
-    402: "Payment Required",
-    403: "Forbidden",
-    404: "Not Found",
-    405: "Method Not Allowed",
-    406: "Not Acceptable",
-    407: "Proxy Authentication Required",
-    408: "Request Timeout",
-    409: "Conflict",
-    410: "Gone",
-    413: "Payload Too Large",
-    414: "URI Too Long",
-    415: "Unsupported Media Type",
-    429: "Too Many Requests",
-    500: "Internal Server Error",
-    501: "Not Implemented",
-    502: "Bad Gateway",
-    503: "Service Unavailable",
-    504: "Gateway Timeout",
-    505: "HTTP Version Not Supported",
-  },
-  // Chromium \u7F51\u7EDC\u9519\u8BEF\u7801\uFF0C\u6309\u7EDD\u5BF9\u503C\u5339\u914D\uFF0C\u517C\u5BB9 -105 \u4E0E 105 \u4E24\u79CD\u4F20\u5165\u5F62\u5F0F
-  NET_ERROR_NAME = {
-    2: "ERR_FAILED",
-    3: "ERR_ABORTED",
-    6: "ERR_FILE_NOT_FOUND",
-    7: "ERR_TIMED_OUT",
-    9: "ERR_UNEXPECTED",
-    10: "ERR_ACCESS_DENIED",
-    20: "ERR_UNKNOWN_URL_SCHEME",
-    21: "ERR_INVALID_URL",
-    100: "ERR_CONNECTION_CLOSED",
-    101: "ERR_CONNECTION_RESET",
-    102: "ERR_CONNECTION_REFUSED",
-    103: "ERR_CONNECTION_ABORTED",
-    104: "ERR_CONNECTION_FAILED",
-    105: "ERR_NAME_NOT_RESOLVED",
-    106: "ERR_INTERNET_DISCONNECTED",
-    107: "ERR_SSL_PROTOCOL_ERROR",
-    108: "ERR_ADDRESS_INVALID",
-    109: "ERR_ADDRESS_UNREACHABLE",
-    113: "ERR_SSL_VERSION_OR_CIPHER_MISMATCH",
-    118: "ERR_CONNECTION_TIMED_OUT",
-    130: "ERR_PROXY_CONNECTION_FAILED",
-    137: "ERR_NAME_RESOLUTION_FAILED",
-    138: "ERR_NETWORK_ACCESS_DENIED",
-    324: "ERR_EMPTY_RESPONSE",
-    379: "ERR_HTTP_RESPONSE_CODE_FAILURE / HTTP \u54CD\u5E94\u72B6\u6001\u7801\u9519\u8BEF",
-  },
-  IE_ERROR_NAME = {
-    "0x80040154": "REGDB_E_CLASSNOTREG\uFF08COM \u7C7B\u672A\u6CE8\u518C\uFF09",
-    "0x80040155": "REGDB_E_IIDNOTREG\uFF08COM \u63A5\u53E3\u672A\u6CE8\u518C\uFF09",
-  },
-  get_code_type_text = function (code) {
-    var name = code.replace(/^net::/i, "");
-    if (/^ERR_/i.test(name)) {
-      return name;
-    }
-    if (/^0x[0-9a-f]+$/i.test(name)) {
-      return IE_ERROR_NAME[name.toLowerCase()] || "";
-    }
-    var num = parseInt(name, 10);
-    if (isNaN(num)) {
-      return "";
-    }
-    var abs = Math.abs(num);
-    if (abs >= 400 && abs <= 599 && HTTP_STATUS_TEXT[abs]) {
-      return "HTTP " + abs + " " + HTTP_STATUS_TEXT[abs];
-    }
-    return NET_ERROR_NAME[abs] || "";
-  },
-  show_error_code = function (errorcode) {
-    var raw;
-    try {
-      raw =
-        errorcode === undefined || errorcode === null
-          ? ""
-          : String(errorcode).trim();
-      if (!raw) {
-        return;
-      }
-      var type = get_code_type_text(raw);
-      var el = $("#tips-code");
-      el.textContent =
-        "\u9519\u8BEF\u4EE3\u7801\uFF1A" + raw + (type ? "\uFF08" + type + "\uFF09" : "");
-      el.style.display = "block";
-    } catch (e) {}
   },
   get_download_site_url = function () {
     var url = "http://baoku.360.cn/soft/show/appid/";
@@ -283,13 +134,6 @@ var $ = function (selector) {
   // focus_num = 0,
   showerrorinfo = function (errorcode, lasterrorurl) {
     //var errorcode = $('errorcode').innerHTML, lasterrorurl = $("#lasterrorurl").innerHTML;
-    // \u672C\u5730\u9884\u89C8\u6216\u539F\u751F\u5C42\u672A\u4F20\u53C2\u65F6\uFF0C\u56DE\u9000\u5230\u9875\u9762\u5730\u5740\u4E2D\u7684 url/error \u53C2\u6570
-    if (errorcode === undefined || errorcode === null || errorcode === "") {
-      errorcode = get_query_param("error");
-    }
-    if (!lasterrorurl) {
-      lasterrorurl = get_query_param("url");
-    }
     if (lasterrorurl == "") {
       return;
     }
@@ -502,46 +346,19 @@ var $ = function (selector) {
       window.location = lasterrorurl;
       return false;
     };
-    // 动态添加线上 JS
-    var sct = document.createElement("script");
-    sct.src = "https://browser.360.cn/se/errorpage_csex_x/errsug7_new.js";
-    document.body.appendChild(sct);
-    // 动态添加 线上 css
-    var css = document.createElement("link");
-    css.rel = "stylesheet";
-    css.href = "https://browser.360.cn/se/errorpage_csex_x/se_errors.css";
-    document.getElementsByTagName("head")[0].appendChild(css);
-    // \u8F93\u51FA\u9519\u8BEF\u7801\u4E0E\u9519\u8BEF\u7C7B\u578B
-    show_error_code(errorcode);
   },
   responsesysinfo = function (sysinfo) {
     window.sysinfo_ = sysinfo;
     chrome.send("geterrorinfo");
   };
-chrome.send("getsysinfo");
 
-// 展现点
-Frame.sendGif('1489.9616.gif')
-// 加载 ifarme
-var iframeHeight,
-  iframeReady = false;
-// ifarme 通信
-window.addEventListener(
-  "message",
-  function (e) {
-    const { type, value } = e.data;
-    if (type == "isReady") {
-      $("#errors_iframe").style.height = value + "px";
-      $("#errors_iframe").style.background = "#eeeeee";
-      $("#errors_iframe").style.display = "block";
-      iframeReady = true;
-    }
-    // if (e.data.height) {
-    //   // h
-    //   iframeHeight = e.data.height;
-
-    //   iframeResize();
-    // }
-  },
-  false
-);
+// \u539F\u751F\u901A\u9053\u53EF\u7528\u65F6\u7531\u539F\u751F\u56DE\u8C03 showerrorinfo\uFF1B\u5426\u5219\u76F4\u63A5\u6E32\u67D3\u9ED8\u8BA4\u9519\u8BEF\u9875
+if (nativeBridge) {
+  chrome.send("getsysinfo");
+} else {
+  showerrorinfo(
+    parseInt((/[?&]error=([^&]*)/.exec(location.search) || [])[1], 10) || 0,
+    decodeURIComponent((/[?&]url=([^&]*)/.exec(location.search) || [])[1] || "") ||
+      location.href
+  );
+}
