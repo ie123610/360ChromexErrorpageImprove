@@ -134,6 +134,10 @@ var $ = function (selector) {
   // focus_num = 0,
   showerrorinfo = function (errorcode, lasterrorurl) {
     //var errorcode = $('errorcode').innerHTML, lasterrorurl = $("#lasterrorurl").innerHTML;
+    // \u539F\u751F\u5C42\u53EF\u80FD\u53EA\u4F20\u9519\u8BEF\u7801\uFF0C\u6B64\u5904\u505A\u7C7B\u578B\u4FDD\u62A4\uFF0C\u907F\u514D\u540E\u7EED split \u629B\u5F02\u5E38
+    if (typeof lasterrorurl !== "string") {
+      lasterrorurl = lasterrorurl == null ? "" : String(lasterrorurl);
+    }
     if (lasterrorurl == "") {
       return;
     }
@@ -353,12 +357,32 @@ var $ = function (selector) {
   };
 
 // \u539F\u751F\u901A\u9053\u53EF\u7528\u65F6\u7531\u539F\u751F\u56DE\u8C03 showerrorinfo\uFF1B\u5426\u5219\u76F4\u63A5\u6E32\u67D3\u9ED8\u8BA4\u9519\u8BEF\u9875
+function fallbackRender() {
+  try {
+    showerrorinfo(
+      parseInt((/[?&]error=([^&]*)/.exec(location.search) || [])[1], 10) || 0,
+      decodeURIComponent((/[?&]url=([^&]*)/.exec(location.search) || [])[1] || "") ||
+        location.href
+    );
+  } catch (e) {
+    console.error("[errorpage] fallback render failed:", e);
+  }
+  // \u515C\u5E95\uFF1A\u5373\u4F7F\u4E0A\u9762\u629B\u9519\u4E5F\u4E0D\u8BA9\u9875\u9762\u505C\u5728\u767D\u5C4F
+  var t = document.getElementById("t");
+  if (t && t.style.display !== "block") {
+    t.style.display = "block";
+  }
+}
+
 if (nativeBridge) {
   chrome.send("getsysinfo");
+  // \u539F\u751F\u6CA1\u56DE\u8C03\uFF08\u5982 getsysinfo/geterrorinfo \u672A\u88AB\u5904\u7406\uFF09\u65F6\u515C\u5E95\u6E32\u67D3
+  setTimeout(function () {
+    var t = document.getElementById("t");
+    if (t && t.style.display !== "block") {
+      fallbackRender();
+    }
+  }, 500);
 } else {
-  showerrorinfo(
-    parseInt((/[?&]error=([^&]*)/.exec(location.search) || [])[1], 10) || 0,
-    decodeURIComponent((/[?&]url=([^&]*)/.exec(location.search) || [])[1] || "") ||
-      location.href
-  );
+  fallbackRender();
 }
