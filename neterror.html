@@ -1,35 +1,348 @@
 <!DOCTYPE html>
-<html i18n-values="dir:textdirection" class="dark-mode">
-  <head>
-    <title>chrome://errorpage/?errorcode</title>
+<html lang="zh-CN" class="dark-mode">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>加载出错</title>
+<style>
+  html, body { margin: 0; padding: 0; }
+  * { box-sizing: border-box; }
+  body {
+    min-width: 950px;
+    font-family: "Microsoft YaHei", Tahoma, Helvetica, Arial, sans-serif;
+    color: #6e6e6e;
+    background-color: #fff;
+  }
+  .main { min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  .warper {
+    width: 100%;
+    min-width: 950px;
+    min-height: 176px;
+    margin: 0 auto;
+    position: relative;
+    color: #6e6e6e;
+    flex-shrink: 0;
+  }
+  .error-tips {
+    position: absolute;
+    left: 50%;
+    top: 32px;
+    padding-left: 104px;
+    text-align: left;
+    transform: translateX(-50%);
+  }
+  .error-icon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80px;
+    height: 80px;
+  }
+  .error-icon svg { display: block; width: 80px; height: 80px; }
+  .error-tips h2 {
+    margin: 0 0 8px;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 28px;
+    color: rgba(0, 0, 0, 0.9);
+  }
+  .error-tips p { display: none; }
+  #suggestion {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 22px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+  #tips-code {
+    margin-top: 8px;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 20px;
+    color: rgba(0, 0, 0, 0.45);
+    word-break: break-all;
+  }
+  .error-btns { margin-top: 16px; }
+  .error-btns button,
+  .error-btns a {
+    display: none;
+    min-width: 88px;
+    height: 32px;
+    padding: 0 14px;
+    margin: 0 8px 8px 0;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 30px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 2px;
+    cursor: pointer;
+    outline: none;
+  }
+  .error-btns .greenbtn,
+  .error-btns .bluebtn,
+  .error-btns .graybtn,
+  .error-btns .tarnsparentbtn {
+    border: 1px solid #31b71f;
+    background-color: #5abc4d;
+    background-image: -webkit-linear-gradient(#62c456, #4db240);
+    color: #fff;
+    text-shadow: 0 -1px 0 #3fad31;
+  }
+  .error-btns .greenbtn:hover { border-color: #39c727; background-color: #75d668; background-image: -webkit-linear-gradient(#71cc66, #5cbc4f); }
+  .error-btns .greenbtn:active { border-color: #31b71f; background-color: #75d668; background-image: -webkit-linear-gradient(#4db240, #62c456); }
+  .error-btns .bluebtn { border-color: #2e93d8; background-color: #51b0f2; background-image: -webkit-linear-gradient(#64bbf6, #3ba5ed); text-shadow: 0 -1px 0 #49a5e3; }
+  .error-btns .bluebtn:hover { border-color: #6bb7ec; background-color: #74c1f6; background-image: -webkit-linear-gradient(#81c8f8, #65baf3); }
+  .error-btns .bluebtn:active { border-color: #47a2e0; background-color: #4fb0f1; background-image: -webkit-linear-gradient(#3da6ed, #63baf6); }
+  .error-btns .graybtn { border-color: #aaa; background-color: #fafafa; background-image: -webkit-linear-gradient(#fafafa, #f4f4f4); color: #555; text-shadow: 0 -1px 0 #f8f8f8; }
+  .error-btns .graybtn:hover { border-color: #bbb; background-color: #fbfbfb; background-image: -webkit-linear-gradient(#fbfbfb, #f5f5f5); }
+  .error-btns .graybtn:active { border-color: #999; background-color: #f9f9f9; background-image: -webkit-linear-gradient(#f9f9f9, #f0f0f0); }
+  .error-btns .tarnsparentbtn { border-color: #d0d0d0; background-color: #fff; background-image: none; color: #666; text-shadow: none; }
+  .error-btns .tarnsparentbtn:hover { border-color: #c0c0c0; background-color: #f7f7f7; }
+  .error-btns .tarnsparentbtn:active { border-color: #b0b0b0; background-color: #f0f0f0; }
 
-    <link rel="stylesheet" href="neterror.css" />
-
-    <script src="shared/js/cr.js"></script>
-    <script src="shared/js/load_time_data.js"></script>
-    <script src="shared/js/parse_html_subset.js"></script>
-    <script src="shared/js/util.js"></script>
-    <script src="chrome://errorpage/strings.js"></script>
-  </head>
-  <body id="t" hidden>
-    <div class="main s-scroll">
-      <div class="warper">
-        <div class="error-tips">
-          <div class="error-icon"></div>
-          <h2 id="tips-title">ERROR PAGE</h2>
-          <p id="tips-type"></p>
-          <div id="suggestion"></div>
-          <div class="error-btns">
-            <button id="btn-goback" class="greenbtn">back</button>
-            <button id="btn-close" class="greenbtn">close</button>
-            <a id="btn-gohome" class="bluebtn">go home</a>
-            <button id="btn-refesh" class="greenbtn">refresh</button>
-            <button id="btn-jijiuxiang" class="tarnsparentbtn">jjx</button>
-          </div>
+  @media (prefers-color-scheme: dark) {
+    html.dark-mode { background-color: #27282f; }
+    html.dark-mode body { background-color: #27282f; }
+    .dark-mode .warper { color: rgba(255, 255, 255, 0.6); }
+    .dark-mode .error-tips h2 { color: #fff; font-weight: normal; }
+    .dark-mode #suggestion { color: #fff; }
+    .dark-mode #tips-code { color: rgba(255, 255, 255, 0.6); }
+    .dark-mode .error-btns .tarnsparentbtn { border-color: #4a4b55; background-color: #31323a; color: #d0d0d0; }
+    .dark-mode .error-btns .tarnsparentbtn:hover { background-color: #3a3b44; }
+  }
+</style>
+</head>
+<body id="t">
+  <div class="main s-scroll">
+    <div class="warper">
+      <div class="error-tips">
+        <div class="error-icon" aria-hidden="true">
+          <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="38" fill="#eef1f5"></circle>
+            <path d="M40 20 L63 62 H17 Z" fill="#ffb020" stroke="#f59a10" stroke-width="2" stroke-linejoin="round"></path>
+            <rect x="37.5" y="33" width="5" height="16" rx="2.5" fill="#fff"></rect>
+            <circle cx="40" cy="55" r="3" fill="#fff"></circle>
+          </svg>
+        </div>
+        <h2 id="tips-title">加载出错</h2>
+        <p id="tips-type"></p>
+        <div id="suggestion"></div>
+        <div id="tips-code"></div>
+        <div class="error-btns">
+          <button id="btn-refesh" class="greenbtn" type="button">刷新网页</button>
+          <button id="btn-goback" class="greenbtn" type="button">返回上一页</button>
+          <a id="btn-gohome" class="bluebtn">去该网站首页</a>
+          <button id="btn-close" class="greenbtn" type="button">关闭</button>
+          <button id="btn-jijiuxiang" class="tarnsparentbtn" type="button">360断网急救箱</button>
+          <a id="btn-reinstall-ie" class="greenbtn" href="http://baoku.360.cn/soft/search?kw=Internet%20Explorer">重装稳定版IE</a>
+          <a id="btn-expert" class="graybtn" href="http://web.jishi.360.cn/">电脑专家帮助</a>
         </div>
       </div>
     </div>
-    <script src="neterror.js"></script>
-    <script src="shared/js/i18n_template2.js"></script>
-  </body>
+  </div>
+<script>
+(function () {
+  "use strict";
+
+  var NET_ERROR = {"-10":"ERR_ACCESS_DENIED","-108":"ERR_ADDRESS_INVALID","-147":"ERR_ADDRESS_IN_USE","-109":"ERR_ADDRESS_UNREACHABLE","-503":"ERR_ADD_USER_CERT_FAILED","-122":"ERR_ALPN_NEGOTIATION_FAILED","-117":"ERR_BAD_SSL_CLIENT_AUTH_CERT","-22":"ERR_BLOCKED_BY_ADMINISTRATOR","-20":"ERR_BLOCKED_BY_CLIENT","-30":"ERR_BLOCKED_BY_CSP","-32":"ERR_BLOCKED_BY_ORB","-27":"ERR_BLOCKED_BY_RESPONSE","-384":"ERR_CACHED_IP_ADDRESS_SPACE_BLOCKED_BY_PRIVATE_NETWORK_ACCESS_POLICY","-410":"ERR_CACHE_AUTH_FAILURE_AFTER_READ","-408":"ERR_CACHE_CHECKSUM_MISMATCH","-407":"ERR_CACHE_CHECKSUM_READ_FAILURE","-405":"ERR_CACHE_CREATE_FAILURE","-412":"ERR_CACHE_DOOM_FAILURE","-411":"ERR_CACHE_ENTRY_NOT_SUITABLE","-409":"ERR_CACHE_LOCK_TIMEOUT","-400":"ERR_CACHE_MISS","-404":"ERR_CACHE_OPEN_FAILURE","-413":"ERR_CACHE_OPEN_OR_CREATE_FAILURE","-403":"ERR_CACHE_OPERATION_NOT_SUPPORTED","-406":"ERR_CACHE_RACE","-401":"ERR_CACHE_READ_FAILURE","-402":"ERR_CACHE_WRITE_FAILURE","-214":"ERR_CERTIFICATE_TRANSPARENCY_REQUIRED","-202":"ERR_CERT_AUTHORITY_INVALID","-200":"ERR_CERT_COMMON_NAME_INVALID","-203":"ERR_CERT_CONTAINS_ERRORS","-714":"ERR_CERT_DATABASE_CHANGED","-201":"ERR_CERT_DATE_INVALID","-219":"ERR_CERT_END","-207":"ERR_CERT_INVALID","-217":"ERR_CERT_KNOWN_INTERCEPTION_BLOCKED","-212":"ERR_CERT_NAME_CONSTRAINT_VIOLATION","-210":"ERR_CERT_NON_UNIQUE_NAME","-204":"ERR_CERT_NO_REVOCATION_MECHANISM","-206":"ERR_CERT_REVOKED","-215":"ERR_CERT_SYMANTEC_LEGACY","-205":"ERR_CERT_UNABLE_TO_CHECK_REVOCATION","-213":"ERR_CERT_VALIDITY_TOO_LONG","-716":"ERR_CERT_VERIFIER_CHANGED","-211":"ERR_CERT_WEAK_KEY","-208":"ERR_CERT_WEAK_SIGNATURE_ALGORITHM","-29":"ERR_CLEARTEXT_NOT_PERMITTED","-151":"ERR_CLIENT_AUTH_CERT_TYPE_UNSUPPORTED","-103":"ERR_CONNECTION_ABORTED","-100":"ERR_CONNECTION_CLOSED","-104":"ERR_CONNECTION_FAILED","-102":"ERR_CONNECTION_REFUSED","-101":"ERR_CONNECTION_RESET","-118":"ERR_CONNECTION_TIMED_OUT","-330":"ERR_CONTENT_DECODING_FAILED","-371":"ERR_CONTENT_DECODING_INIT_FAILED","-354":"ERR_CONTENT_LENGTH_MISMATCH","-26":"ERR_CONTEXT_SHUT_DOWN","-171":"ERR_CT_CONSISTENCY_PROOF_PARSING_FAILED","-169":"ERR_CT_STH_INCOMPLETE","-168":"ERR_CT_STH_PARSING_FAILED","-812":"ERR_DICTIONARY_LOAD_FAILED","-301":"ERR_DISALLOWED_URL_SCHEME","-804":"ERR_DNS_CACHE_MISS","-800":"ERR_DNS_MALFORMED_RESPONSE","-809":"ERR_DNS_NAME_HTTPS_ONLY","-811":"ERR_DNS_NO_MATCHING_SUPPORTED_ALPN","-810":"ERR_DNS_REQUEST_CANCELLED","-805":"ERR_DNS_SEARCH_EMPTY","-808":"ERR_DNS_SECURE_RESOLVER_HOSTNAME_RESOLUTION_FAILED","-802":"ERR_DNS_SERVER_FAILED","-801":"ERR_DNS_SERVER_REQUIRES_TCP","-806":"ERR_DNS_SORT_ERROR","-803":"ERR_DNS_TIMED_OUT","-178":"ERR_EARLY_DATA_REJECTED","-184":"ERR_ECH_FALLBACK_CERTIFICATE_INVALID","-183":"ERR_ECH_NOT_NEGOTIATED","-324":"ERR_EMPTY_RESPONSE","-333":"ERR_ENCODING_CONVERSION_FAILED","-340":"ERR_ENCODING_DETECTION_FAILED","-2":"ERR_FAILED","-16":"ERR_FILE_EXISTS","-6":"ERR_FILE_NOT_FOUND","-18":"ERR_FILE_NO_SPACE","-17":"ERR_FILE_PATH_TOO_LONG","-8":"ERR_FILE_TOO_BIG","-19":"ERR_FILE_VIRUS_INFECTED","-607":"ERR_FTP_BAD_COMMAND_SEQUENCE","-606":"ERR_FTP_COMMAND_NOT_SUPPORTED","-601":"ERR_FTP_FAILED","-604":"ERR_FTP_FILE_BUSY","-602":"ERR_FTP_SERVICE_UNAVAILABLE","-605":"ERR_FTP_SYNTAX_ERROR","-603":"ERR_FTP_TRANSFER_ABORTED","-31":"ERR_H2_OR_QUIC_REQUIRED","-119":"ERR_HOST_RESOLVER_QUEUE_TOO_LARGE","-363":"ERR_HTTP2_COMPRESSION_ERROR","-361":"ERR_HTTP2_FLOW_CONTROL_ERROR","-362":"ERR_HTTP2_FRAME_SIZE_ERROR","-360":"ERR_HTTP2_INADEQUATE_TRANSPORT_SECURITY","-352":"ERR_HTTP2_PING_FAILED","-337":"ERR_HTTP2_PROTOCOL_ERROR","-372":"ERR_HTTP2_RST_STREAM_NO_ERROR_RECEIVED","-351":"ERR_HTTP2_SERVER_REFUSED_STREAM","-376":"ERR_HTTP2_STREAM_CLOSED","-140":"ERR_HTTPS_PROXY_TUNNEL_RESPONSE_REDIRECT","-365":"ERR_HTTP_1_1_REQUIRED","-379":"ERR_HTTP_RESPONSE_CODE_FAILURE","-166":"ERR_ICANN_NAME_COLLISION","-705":"ERR_IMPORT_CA_CERT_FAILED","-703":"ERR_IMPORT_CA_CERT_NOT_CA","-704":"ERR_IMPORT_CERT_ALREADY_EXISTS","-706":"ERR_IMPORT_SERVER_CERT_FAILED","-355":"ERR_INCOMPLETE_CHUNKED_ENCODING","-347":"ERR_INCOMPLETE_HTTP2_HEADERS","-383":"ERR_INCONSISTENT_IP_ADDRESS_SPACE","-501":"ERR_INSECURE_RESPONSE","-12":"ERR_INSUFFICIENT_RESOURCES","-106":"ERR_INTERNET_DISCONNECTED","-4":"ERR_INVALID_ARGUMENT","-338":"ERR_INVALID_AUTH_CREDENTIALS","-321":"ERR_INVALID_CHUNKED_ENCODING","-182":"ERR_INVALID_ECH_CONFIG_LIST","-5":"ERR_INVALID_HANDLE","-370":"ERR_INVALID_HTTP_RESPONSE","-303":"ERR_INVALID_REDIRECT","-320":"ERR_INVALID_RESPONSE","-504":"ERR_INVALID_SIGNED_EXCHANGE","-300":"ERR_INVALID_URL","-505":"ERR_INVALID_WEB_BUNDLE","-710":"ERR_KEY_GENERATION_FAILED","-329":"ERR_MALFORMED_IDENTITY","-131":"ERR_MANDATORY_PROXY_CONFIGURATION_FAILED","-322":"ERR_METHOD_NOT_SUPPORTED","-343":"ERR_MISCONFIGURED_AUTH_ENVIRONMENT","-341":"ERR_MISSING_AUTH_CREDENTIALS","-142":"ERR_MSG_TOO_BIG","-105":"ERR_NAME_NOT_RESOLVED","-137":"ERR_NAME_RESOLUTION_FAILED","-138":"ERR_NETWORK_ACCESS_DENIED","-21":"ERR_NETWORK_CHANGED","-331":"ERR_NETWORK_IO_SUSPENDED","-11":"ERR_NOT_IMPLEMENTED","-176":"ERR_NO_BUFFER_SPACE","-502":"ERR_NO_PRIVATE_KEY_FOR_CERT","-112":"ERR_NO_SSL_VERSIONS_ENABLED","-336":"ERR_NO_SUPPORTED_PROXIES","-13":"ERR_OUT_OF_MEMORY","-348":"ERR_PAC_NOT_IN_DHCP","-327":"ERR_PAC_SCRIPT_FAILED","-367":"ERR_PAC_SCRIPT_TERMINATED","-701":"ERR_PKCS12_IMPORT_BAD_PASSWORD","-702":"ERR_PKCS12_IMPORT_FAILED","-708":"ERR_PKCS12_IMPORT_INVALID_FILE","-707":"ERR_PKCS12_IMPORT_INVALID_MAC","-709":"ERR_PKCS12_IMPORT_UNSUPPORTED","-133":"ERR_PRECONNECT_MAX_SOCKET_LIMIT","-712":"ERR_PRIVATE_KEY_EXPORT_FAILED","-127":"ERR_PROXY_AUTH_REQUESTED","-364":"ERR_PROXY_AUTH_REQUESTED_WITH_NO_CONNECTION","-115":"ERR_PROXY_AUTH_UNSUPPORTED","-136":"ERR_PROXY_CERTIFICATE_INVALID","-130":"ERR_PROXY_CONNECTION_FAILED","-366":"ERR_PROXY_HTTP_1_1_REQUIRED","-380":"ERR_QUIC_CERT_ROOT_NOT_KNOWN","-381":"ERR_QUIC_GOAWAY_REQUEST_CAN_BE_RETRIED","-358":"ERR_QUIC_HANDSHAKE_FAILED","-356":"ERR_QUIC_PROTOCOL_ERROR","-174":"ERR_READ_IF_READY_NOT_IMPLEMENTED","-328":"ERR_REQUEST_RANGE_NOT_SATISFIABLE","-345":"ERR_RESPONSE_BODY_TOO_BIG_TO_DRAIN","-349":"ERR_RESPONSE_HEADERS_MULTIPLE_CONTENT_DISPOSITION","-346":"ERR_RESPONSE_HEADERS_MULTIPLE_CONTENT_LENGTH","-350":"ERR_RESPONSE_HEADERS_MULTIPLE_LOCATION","-325":"ERR_RESPONSE_HEADERS_TOO_BIG","-357":"ERR_RESPONSE_HEADERS_TRUNCATED","-713":"ERR_SELF_SIGNED_CERT_GENERATION_FAILED","-23":"ERR_SOCKET_IS_CONNECTED","-15":"ERR_SOCKET_NOT_CONNECTED","-162":"ERR_SOCKET_RECEIVE_BUFFER_SIZE_UNCHANGEABLE","-163":"ERR_SOCKET_SEND_BUFFER_SIZE_UNCHANGEABLE","-160":"ERR_SOCKET_SET_RECEIVE_BUFFER_SIZE_ERROR","-161":"ERR_SOCKET_SET_SEND_BUFFER_SIZE_ERROR","-120":"ERR_SOCKS_CONNECTION_FAILED","-121":"ERR_SOCKS_CONNECTION_HOST_UNREACHABLE","-149":"ERR_SSL_BAD_PEER_PUBLIC_KEY","-126":"ERR_SSL_BAD_RECORD_MAC_ALERT","-164":"ERR_SSL_CLIENT_AUTH_CERT_BAD_FORMAT","-110":"ERR_SSL_CLIENT_AUTH_CERT_NEEDED","-135":"ERR_SSL_CLIENT_AUTH_CERT_NO_PRIVATE_KEY","-177":"ERR_SSL_CLIENT_AUTH_NO_COMMON_ALGORITHMS","-134":"ERR_SSL_CLIENT_AUTH_PRIVATE_KEY_ACCESS_DENIED","-141":"ERR_SSL_CLIENT_AUTH_SIGNATURE_FAILED","-125":"ERR_SSL_DECOMPRESSION_FAILURE_ALERT","-153":"ERR_SSL_DECRYPT_ERROR_ALERT","-148":"ERR_SSL_HANDSHAKE_NOT_COMPLETED","-181":"ERR_SSL_KEY_USAGE_INCOMPATIBLE","-123":"ERR_SSL_NO_RENEGOTIATION","-172":"ERR_SSL_OBSOLETE_CIPHER","-150":"ERR_SSL_PINNED_KEY_NOT_IN_CERT_CHAIN","-107":"ERR_SSL_PROTOCOL_ERROR","-114":"ERR_SSL_RENEGOTIATION_REQUESTED","-167":"ERR_SSL_SERVER_CERT_BAD_FORMAT","-156":"ERR_SSL_SERVER_CERT_CHANGED","-159":"ERR_SSL_UNRECOGNIZED_NAME_ALERT","-113":"ERR_SSL_VERSION_OR_CIPHER_MISMATCH","-332":"ERR_SYN_REPLY_NOT_RECEIVED","-139":"ERR_TEMPORARILY_THROTTLED","-7":"ERR_TIMED_OUT","-180":"ERR_TLS13_DOWNGRADE_DETECTED","-382":"ERR_TOO_MANY_ACCEPT_CH_RESTARTS","-310":"ERR_TOO_MANY_REDIRECTS","-375":"ERR_TOO_MANY_RETRIES","-506":"ERR_TRUST_TOKEN_OPERATION_FAILED","-507":"ERR_TRUST_TOKEN_OPERATION_SUCCESS_WITHOUT_SENDING_REQUEST","-111":"ERR_TUNNEL_CONNECTION_FAILED","-170":"ERR_UNABLE_TO_REUSE_CONNECTION_FOR_PROXY_AUTH","-344":"ERR_UNDOCUMENTED_SECURITY_LIBRARY_STATUS","-9":"ERR_UNEXPECTED","-323":"ERR_UNEXPECTED_PROXY_AUTH","-342":"ERR_UNEXPECTED_SECURITY_LIBRARY_STATUS","-302":"ERR_UNKNOWN_URL_SCHEME","-334":"ERR_UNRECOGNIZED_FTP_DIRECTORY_LISTING_FORMAT","-312":"ERR_UNSAFE_PORT","-311":"ERR_UNSAFE_REDIRECT","-339":"ERR_UNSUPPORTED_AUTH_SCHEME","-14":"ERR_UPLOAD_FILE_CHANGED","-25":"ERR_UPLOAD_STREAM_REWIND_NOT_SUPPORTED","-124":"ERR_WINSOCK_UNEXPECTED_WRITTEN_BYTES","-179":"ERR_WRONG_VERSION_ON_EARLY_DATA","-145":"ERR_WS_PROTOCOL_ERROR","-154":"ERR_WS_THROTTLE_QUEUE_TOO_LARGE","-173":"ERR_WS_UPGRADE"};
+
+  var HTTP_TEXT = {
+    400: "Bad Request", 401: "Unauthorized", 402: "Payment Required",
+    403: "Forbidden", 404: "Not Found", 405: "Method Not Allowed",
+    406: "Not Acceptable", 407: "Proxy Authentication Required",
+    408: "Request Timeout", 409: "Conflict", 410: "Gone",
+    411: "Length Required", 412: "Precondition Failed", 413: "Payload Too Large",
+    414: "URI Too Long", 415: "Unsupported Media Type", 416: "Range Not Satisfiable",
+    417: "Expectation Failed", 418: "I'm a teapot", 421: "Misdirected Request",
+    422: "Unprocessable Entity", 426: "Upgrade Required", 428: "Precondition Required",
+    429: "Too Many Requests", 431: "Request Header Fields Too Large",
+    451: "Unavailable For Legal Reasons",
+    500: "Internal Server Error", 501: "Not Implemented", 502: "Bad Gateway",
+    503: "Service Unavailable", 504: "Gateway Timeout",
+    505: "HTTP Version Not Supported", 506: "Variant Also Negotiates",
+    507: "Insufficient Storage", 508: "Loop Detected", 510: "Not Extended",
+    511: "Network Authentication Required"
+  };
+
+  var IE_ERROR = {
+    "0x80040154": "REGDB_E_CLASSNOTREG（COM 类未注册）",
+    "0x80040155": "REGDB_E_IIDNOTREG（COM 接口未注册）"
+  };
+
+  var E_DNS = [104, 105];
+  var E_LINK = [403, 405, 406, 500];
+  var E_NET = [118, 106, 324, 138, 109, 130, 331, 346, 349, 350, 107, 128, 117, 129, 132, 143, 20, 150];
+
+  function $(id) { return document.getElementById(id); }
+
+  function pick(name, alt) {
+    var v = qs.get(name);
+    if (v === null || v === "") { v = qs.get(alt); }
+    return v === null ? "" : v;
+  }
+
+  function toAbsNum(code) {
+    var n = parseInt(code, 10);
+    return isNaN(n) ? NaN : Math.abs(n);
+  }
+
+  function has(list, code) {
+    var n = toAbsNum(code);
+    return !isNaN(n) && list.indexOf(n) > -1;
+  }
+
+  function typeText(code) {
+    var raw = String(code).trim();
+    if (!raw) { return ""; }
+    if (/^ERR_/i.test(raw)) { return raw.toUpperCase(); }
+    if (/^0x[0-9a-f]+$/i.test(raw)) { return IE_ERROR[raw.toLowerCase()] || ""; }
+    var n = parseInt(raw, 10);
+    if (isNaN(n)) { return ""; }
+    if (n >= 400 && n <= 599 && HTTP_TEXT[n]) { return "HTTP " + n + " " + HTTP_TEXT[n]; }
+    var key = String(-Math.abs(n));
+    return NET_ERROR[key] || "";
+  }
+
+  function getDomain(str) {
+    var m = /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/.exec(str);
+    return m ? m[0] : "";
+  }
+
+  function isIp(str) {
+    var m = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.exec(str);
+    return !!m && +m[1] < 256 && +m[2] < 256 && +m[3] < 256 && +m[4] < 256;
+  }
+
+  function homeUrl(url) {
+    var domain = getDomain(url);
+    if (!domain) { return ""; }
+    var scheme = url.indexOf("://") > 0 ? url.split("://")[0] + "://" : "";
+    if (isIp(domain)) { return scheme + domain; }
+    var parts = domain.split(".");
+    var n = parts.length;
+    if (n == 3 && parts[0] != "www") {
+      return scheme + "www." + parts[1] + "." + parts[2];
+    }
+    if (n > 3) {
+      return scheme + "www." + parts[n - 2] + "." + parts[n - 1];
+    }
+    return scheme + domain;
+  }
+
+  var qs = new URLSearchParams(window.location.search);
+  var errorcode = pick("errorcode", "error");
+  var lasturl = pick("lasturl", "url");
+  var btnIds = ["btn-refesh", "btn-goback", "btn-gohome", "btn-close", "btn-jijiuxiang", "btn-reinstall-ie", "btn-expert"];
+
+  function show(id) {
+    var el = $(id);
+    if (el) { el.style.display = "inline-block"; }
+  }
+
+  function setText(tipTitle, tipType, suggestion) {
+    $("tips-title").innerHTML = tipTitle;
+    $("tips-type").innerHTML = tipType;
+    $("suggestion").innerHTML = suggestion;
+    document.title = $("tips-title").textContent;
+  }
+
+  function render() {
+    var i;
+    for (i = 0; i < btnIds.length; i++) {
+      var el = $(btnIds[i]);
+      if (el) { el.style.display = "none"; }
+    }
+
+    var codeText = String(errorcode).trim();
+    if (codeText) {
+      var type = typeText(codeText);
+      $("tips-code").textContent = "错误代码：" + codeText + (type ? "（" + type + "）" : "");
+    }
+
+    var nativeBridge = !!(window.chrome && typeof window.chrome.send === "function");
+    var isLink = has(E_LINK, errorcode);
+
+    if (has(E_DNS, errorcode)) {
+      setText("域名解析错误", "（DNS解析失败）", "请检查域名拼写，可用“360断网急救箱”检查网络");
+      show("btn-refesh");
+      if (nativeBridge) { show("btn-jijiuxiang"); }
+    } else if (has(E_NET, errorcode) || isLink) {
+      setText(
+        isLink ? "网页无法访问" : "网络连接错误",
+        "（网络错误）",
+        isLink ? "（错误代码" + errorcode + "）" : "请检查网络设置，可用“360断网急救箱”检查网络"
+      );
+      show("btn-refesh");
+      if (nativeBridge) { show("btn-jijiuxiang"); }
+    } else if (parseInt(codeText, 10) === 404) {
+      setText("页面不存在或已被删除", "（404错误）", "（错误代码" + errorcode + "）");
+      show(window.history.length > 1 ? "btn-goback" : "btn-close");
+      show("btn-gohome");
+    } else if (/^0x8004015[45]$/i.test(codeText)) {
+      setText("IE浏览器出现异常", "（IE内核调用错误）", "可能原因：您的Internet Explorer程序可能已经损坏<br/>建议如下操作：");
+      show("btn-reinstall-ie");
+      show("btn-expert");
+    } else {
+      setText("您访问的网页出错了！", "（连接错误）", "网络连接异常、网站服务器失去响应");
+      show("btn-refesh");
+    }
+
+    var home = lasturl ? homeUrl(lasturl) : "";
+    if (home) {
+      $("btn-gohome").setAttribute("href", home);
+    } else {
+      $("btn-gohome").style.display = "none";
+    }
+
+    // 拿不到原始地址时无法刷新/回首页，至少保证有一个可用按钮
+    if (!lasturl) {
+      $("btn-refesh").style.display = "none";
+    }
+    var visible = 0;
+    for (i = 0; i < btnIds.length; i++) {
+      var b = $(btnIds[i]);
+      if (b && b.style.display !== "none") { visible++; }
+    }
+    if (!visible) { show("btn-close"); }
+  }
+
+  function bind() {
+    $("btn-refesh").addEventListener("click", function () {
+      if (!lasturl) { return; }
+      try { window.location.replace(lasturl); } catch (e) { window.location.href = lasturl; }
+    });
+    $("btn-goback").addEventListener("click", function () {
+      window.history.back();
+    });
+    $("btn-close").addEventListener("click", function () {
+      window.close();
+    });
+    $("btn-jijiuxiang").addEventListener("click", function () {
+      if (window.chrome && typeof window.chrome.send === "function") {
+        window.chrome.send("startnetfix");
+        window.chrome.send("startnetfix");
+      }
+    });
+    $("btn-reinstall-ie").addEventListener("click", function () {
+      var sys = String(window.sysinfo_ || "");
+      var appid = {
+        winxp32: "77", winvista32: "105043", winvista64: "105045",
+        win732: "102630048", win764: "102630050"
+      }[sys];
+      this.setAttribute("href", appid
+        ? "http://baoku.360.cn/soft/show/appid/" + appid
+        : "http://baoku.360.cn/soft/search?kw=Internet%20Explorer");
+    });
+  }
+
+  try {
+    bind();
+    render();
+  } catch (e) {
+    var t = document.getElementById("tips-title");
+    if (t) { t.textContent = "加载出错"; }
+  }
+})();
+</script>
+</body>
 </html>
